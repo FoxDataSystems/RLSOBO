@@ -73,7 +73,7 @@ INSERT OR IGNORE INTO Gebruikers (GebruikerID, Voornaam, Achternaam, Email, Rol,
 (4, 'Ralph', 'Behandelaar', 'ralph.behandelaar@cordaan.nl', 'Behandelaar', 1, '{azure_ids[3]}'),
 (5, 'Bart', 'Behandelaar', 'bart.behandelaar@cordaan.nl', 'Behandelaar', 1, '{azure_ids[4]}'),
 (6, 'Vincent', 'Behandelaar', 'vincent.behandelaar@cordaan.nl', 'Behandelaar', 2, '{azure_ids[5]}'),
-(7, 'Ralph', 'Vestigings Manager', 'ralph.vestigingsmanager@cordaan.nl', 'Vestigings Manager', NULL, '{azure_ids[6]}');
+(7, 'Jimmy', 'Vestigings Manager', 'jimmy.vestigingsmanager@cordaan.nl', 'Vestigings Manager', NULL, '{azure_ids[6]}');
 
 UPDATE Afdelingen SET ManagerID = 1 WHERE AfdelingID = 1;
 UPDATE Afdelingen SET ManagerID = 2 WHERE AfdelingID = 2;
@@ -119,3 +119,4 @@ CREATE INDEX IF NOT EXISTS idx_toegangsrechten_gebruiker ON Toegangsrechten(Gebr
 CREATE INDEX IF NOT EXISTS idx_toegangsrechten_cliënt ON Toegangsrechten(CliëntID);
 CREATE INDEX IF NOT EXISTS idx_toegangsrechten_afdeling ON Toegangsrechten(AfdelingID);
 """
+
