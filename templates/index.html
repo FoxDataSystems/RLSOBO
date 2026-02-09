@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Propagation Demo - Wortell × Cordaan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(160deg, #f0f4f8 0%, #e8eef4 50%, #f5f7fa 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+        
+        /* Header: strak met subtiele scheiding */
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 16px 24px;
+        }
+        
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.02em;
+        }
+        
+        /* Hero: ruim en met duidelijke hiërarchie */
+        .hero-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 72px 24px 56px;
+            text-align: center;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #0d9488;
+            margin-bottom: 20px;
+            padding: 6px 14px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 100px;
+        }
+        
+        .hero-title {
+            font-size: clamp(1.875rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        
+        .hero-title .accent {
+            color: #0d9488;
+            position: relative;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.0625rem;
+            color: #64748b;
+            max-width: 540px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        
+        /* Demo-sectie: kaarten met rustige schaduw en hover */
+        .demos-section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+        
+        .section-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 24px;
+            padding-left: 2px;
+        }
+        
+        .demos-grid {
+            display: grid;
+            gap: 28px;
+        }
+        
+        @media (min-width: 640px) {
+            .demos-grid { grid-template-columns: 1fr 1fr; }
+        }
+        
+        .demo-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        
+        .demo-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            border-color: rgba(13, 148, 136, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .demo-card:hover::before {
+            opacity: 1;
+        }
+        
+        .demo-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+        
+        .demo-card p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.65;
+        }
+        
+        .demo-card-features {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+        
+        .demo-card-features li {
+            font-size: 0.875rem;
+            color: #475569;
+            padding: 6px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .demo-card-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 6px;
+            height: 6px;
+            background: #0d9488;
+            border-radius: 50%;
+        }
+        
+        .demo-card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0d9488;
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .demo-card-btn:hover {
+            background: #0f766e;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+        }
+        
+        .demo-card-btn::after {
+            content: '\2192';
+            font-size: 1em;
+        }
+        
+        .demo-card-btn.secondary {
+            background: #fff;
+            color: #1a202c;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+        
+        .demo-card-btn.secondary:hover {
+            border-color: #0d9488;
+            color: #0d9488;
+            box-shadow: none;
+        }
+        
+        .demo-card-btn.secondary::after {
+            content: '\2192';
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">Wortell × Cordaan</div>
+    </header>
+    
+    <main class="hero-section">
+        <p class="hero-badge">Demo</p>
+        <h1 class="hero-title">
+            <span class="accent">Identity Propagation</span><br>
+            met OAuth & RLS
+        </h1>
+        <p class="hero-subtitle">
+            Demonstratie van Identity Propagation met Azure AD OAuth tokens en applicatie-level Row Level Security. 
+            Elke gebruiker ziet alleen de data waar hij of zij toegang toe heeft.
+        </p>
+    </main>
+    
+    <section class="demos-section">
+        <h2 class="section-title">Demonstraties</h2>
+        <div class="demos-grid">
+            <article class="demo-card">
+                <h2>RLS & Identity Propagation</h2>
+                <p>
+                    Test Row Level Security met verschillende gebruikersrollen. Zie hoe managers en behandelaren 
+                    verschillende data zien op basis van rol en afdeling.
+                </p>
+                <ul class="demo-card-features">
+                    <li>Test verschillende gebruikersrollen</li>
+                    <li>RLS-filtering in actie</li>
+                    <li>Uitleg per cliënt</li>
+                    <li>Statistieken over toegang</li>
+                </ul>
+                <a href="/rls-demo" class="demo-card-btn">Start RLS Demo</a>
+            </article>
+            
+            <article class="demo-card">
+                <h2>On-Behalf-Of Flow</h2>
+                <p>
+                    Demonstratie van de On-Behalf-Of (OBO) flow: een service applicatie krijgt namens een gebruiker 
+                    toegang tot resources. De identiteit blijft behouden in de hele flow.
+                </p>
+                <ul class="demo-card-features">
+                    <li>Interactieve flow</li>
+                    <li>Stap-voor-stap uitleg</li>
+                    <li>Tokenflow-visualisatie</li>
+                    <li>Backend service simulatie</li>
+                </ul>
+                <a href="/obo-demo" class="demo-card-btn secondary">Start OBO Demo</a>
+            </article>
+        </div>
+    </section>
+</body>
+</html>

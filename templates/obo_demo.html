@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Behalf-Of Flow Demo - Wortell × Cordaan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(160deg, #f0f4f8 0%, #e8eef4 50%, #f5f7fa 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            line-height: 1.6;
+            padding: 24px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 16px 24px;
+            margin: 0 -24px 24px -24px;
+        }
+        
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.02em;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 10px 18px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .back-link:hover { border-color: #0d9488; color: #0d9488; }
+        
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        
+        .card:hover::before { opacity: 1; }
+        
+        .card h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            letter-spacing: -0.01em;
+        }
+        
+        .card p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.65;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 28px 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-step {
+            flex: 1;
+            min-width: 140px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        
+        .flow-step h3 {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 6px;
+        }
+        
+        .flow-step p {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .demo-controls {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 18px 0;
+        }
+        
+        .demo-controls p {
+            font-size: 0.9375rem;
+            color: #1a202c;
+            margin-bottom: 14px;
+        }
+        
+        .demo-controls strong { color: #0d9488; }
+        
+        .user-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .user-select-btn {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        
+        .user-select-btn:hover {
+            border-color: rgba(13, 148, 136, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+        }
+        
+        .user-select-btn.active {
+            border-color: #0d9488;
+            background: #f0fdfa;
+        }
+        
+        .user-select-btn strong {
+            display: block;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .user-select-btn small {
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+        
+        .token-info {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: ui-monospace, monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            color: #64748b;
+        }
+        
+        .service-call {
+            background: #f0fdfa;
+            border-left: 4px solid #0d9488;
+            border-radius: 6px;
+            padding: 14px;
+            margin: 14px 0;
+            font-size: 0.8125rem;
+            color: #475569;
+        }
+        
+        .service-call strong { color: #1a202c; }
+        .service-call small { display: block; margin-top: 6px; color: #64748b; }
+        
+        .result-box {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 18px;
+        }
+        
+        .result-box h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+        
+        .result-box p, .result-box ul {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .btn {
+            background: #0d9488;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #0f766e;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+        }
+        
+        .card ul {
+            margin-left: 20px;
+            color: #64748b;
+            font-size: 0.875rem;
+            line-height: 1.8;
+        }
+        
+        .card ul li strong { color: #1a202c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">Wortell × Cordaan</div>
+    </div>
+    
+    <div class="container">
+        <a href="/" class="back-link">&#8592; Terug naar overzicht</a>
+        
+        <div class="card">
+            <h2>On-Behalf-Of (OBO) Flow</h2>
+            <p>
+                De On-Behalf-Of flow maakt het mogelijk dat een service-applicatie namens een gebruiker 
+                toegang krijgt tot resources. De identiteit van de oorspronkelijke gebruiker blijft behouden.
+            </p>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h3>1. Gebruiker</h3>
+                    <p>Logt in bij App A, krijgt access token</p>
+                </div>
+                <div class="flow-step">
+                    <h3>2. App A</h3>
+                    <p>Vraagt namens gebruiker nieuw token aan</p>
+                </div>
+                <div class="flow-step">
+                    <h3>3. Azure AD</h3>
+                    <p>Valideert en geeft OBO token terug</p>
+                </div>
+                <div class="flow-step">
+                    <h3>4. App B</h3>
+                    <p>Ontvangt OBO token, ziet oorspronkelijke gebruiker</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Interactieve demo</h2>
+            
+            <div class="demo-controls">
+                <p><strong>Stap 1:</strong> Selecteer een gebruiker die inlogt bij App A</p>
+                <div class="user-selector" id="userSelector">
+                    <a href="#" class="user-select-btn" data-user="Ralph" onclick="selectUser('Ralph'); return false;">
+                        <strong>Ralph</strong>
+                        <small>Behandelaar – Afdeling X</small>
+                    </a>
+                    <a href="#" class="user-select-btn" data-user="Ruud" onclick="selectUser('Ruud'); return false;">
+                        <strong>Ruud</strong>
+                        <small>Manager – Afdeling X</small>
+                    </a>
+                    <a href="#" class="user-select-btn" data-user="Vincent" onclick="selectUser('Vincent'); return false;">
+                        <strong>Vincent</strong>
+                        <small>Vestigings Manager</small>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="demo-controls" id="step2" style="display: none;">
+                <p><strong>Stap 2:</strong> App A ontvangt het token van de gebruiker</p>
+                <div class="token-info" id="userToken">Wachtend op gebruiker selectie...</div>
+            </div>
+            
+            <div class="demo-controls" id="step3" style="display: none;">
+                <p><strong>Stap 3:</strong> App A vraagt OBO token aan bij Azure AD</p>
+                <div class="service-call">
+                    <strong>POST</strong> /oauth2/v2.0/token<br>
+                    <small>grant_type: urn:ietf:params:oauth:grant-type:jwt-bearer | assertion: [gebruiker token] | requested_token_use: on_behalf_of</small>
+                </div>
+                <div class="token-info" id="oboToken">Wachtend op OBO token...</div>
+            </div>
+            
+            <div class="demo-controls" id="step4" style="display: none;">
+                <p><strong>Stap 4:</strong> App B gebruikt het OBO token om data op te halen</p>
+                <button class="btn" onclick="callBackendService()">Roep Backend Service aan</button>
+                <div class="result-box" id="resultBox" style="display: none;">
+                    <h3>Resultaat Backend Service</h3>
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Belangrijke punten</h2>
+            <ul>
+                <li><strong>Identity Propagation:</strong> De oorspronkelijke gebruiker blijft zichtbaar in de hele flow.</li>
+                <li><strong>Security:</strong> Alleen geautoriseerde services kunnen OBO tokens aanvragen.</li>
+                <li><strong>RLS:</strong> De database ziet de oorspronkelijke gebruiker, niet de service.</li>
+                <li><strong>Audit:</strong> Acties worden gelogd met de oorspronkelijke gebruiker.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        var selectedUser = null;
+        
+        function selectUser(userName) {
+            selectedUser = userName;
+            document.querySelectorAll('.user-select-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+                if (btn.dataset.user === userName) btn.classList.add('active');
+            });
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('userToken').textContent =
+                'Access Token voor ' + userName + ':\n' +
+                'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...[token_signature]';
+            setTimeout(function() {
+                document.getElementById('step3').style.display = 'block';
+                document.getElementById('oboToken').textContent =
+                    'OBO Token (namens ' + userName + '):\neyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...[obo_signature]\n\nClaims: oid, name, roles, act_as';
+                setTimeout(function() {
+                    document.getElementById('step4').style.display = 'block';
+                }, 800);
+            }, 1200);
+        }
+        
+        async function callBackendService() {
+            if (!selectedUser) {
+                alert('Selecteer eerst een gebruiker');
+                return;
+            }
+            var resultBox = document.getElementById('resultBox');
+            var resultContent = document.getElementById('resultContent');
+            resultBox.style.display = 'block';
+            resultContent.innerHTML = '<p>Ophalen van data namens ' + selectedUser + '...</p>';
+            try {
+                var response = await fetch('/api/obo/cliënten?gebruiker=' + selectedUser);
+                var data = await response.json();
+                if (data.error) {
+                    resultContent.innerHTML = '<p style="color: #b91c1c;">Fout: ' + data.error + '</p>';
+                    return;
+                }
+                var html = '<p><strong>Data namens ' + selectedUser + ':</strong></p><ul style="margin-top: 12px;">';
+                if (data.cliënten && data.cliënten.length > 0) {
+                    data.cliënten.forEach(function(c) {
+                        html += '<li><strong>' + c.Voornaam + ' ' + c.Achternaam + '</strong> – ' + c.AfdelingNaam + '</li>';
+                    });
+                } else {
+                    html += '<li>Geen cliënten (RLS toegepast)</li>';
+                }
+                html += '</ul><p style="margin-top: 12px; font-size: 0.8125rem; color: #64748b;">' +
+                    'De backend heeft deze data opgehaald met het OBO token; alleen data waar ' + selectedUser + ' toegang toe heeft is zichtbaar.</p>';
+                resultContent.innerHTML = html;
+            } catch (err) {
+                resultContent.innerHTML = '<p style="color: #b91c1c;">Fout: ' + err.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

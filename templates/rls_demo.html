@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLS & Identity Propagation Demo - Wortell × Cordaan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(160deg, #f0f4f8 0%, #e8eef4 50%, #f5f7fa 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            line-height: 1.6;
+            padding: 24px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 16px 24px;
+            margin: 0 -24px 24px -24px;
+        }
+        
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.02em;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 10px 18px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .back-link:hover { border-color: #0d9488; color: #0d9488; }
+        
+        .page-header { margin-bottom: 40px; }
+        
+        .page-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #0d9488;
+            margin-bottom: 12px;
+            padding: 6px 14px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 100px;
+        }
+        
+        .page-header h1 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+        
+        .page-header p {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 560px;
+            line-height: 1.65;
+        }
+        
+        /* Kaarten:zelfde stijl als index */
+        .info-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        
+        .info-card h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 14px;
+            letter-spacing: -0.01em;
+        }
+        
+        .info-card p {
+            font-size: 0.9375rem;
+            color: #64748b;
+            margin-bottom: 12px;
+            line-height: 1.65;
+        }
+        
+        .info-card ul {
+            margin: 12px 0 0 20px;
+            color: #64748b;
+            font-size: 0.875rem;
+            line-height: 1.8;
+        }
+        
+        .info-card li strong { color: #0d9488; }
+        
+        /* Organogram: duidelijke hiërarchie */
+        .organogram-container { margin-top: 0; }
+        
+        .organogram-container > p {
+            margin-bottom: 28px;
+        }
+        
+        .section-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            padding-left: 2px;
+        }
+        
+        .organogram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        /* Niveau 1: Vestigings Manager – visueel bovenaan */
+        .org-level-vestigings {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .org-node.vestigings-manager {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: #f0fdfa;
+            border: 2px solid #0d9488;
+            border-radius: 12px;
+            padding: 24px 36px;
+            text-align: center;
+            min-width: 220px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        
+        .org-node.vestigings-manager:hover {
+            box-shadow: 0 8px 24px rgba(13, 148, 136, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .org-node.vestigings-manager .org-node-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 6px;
+        }
+        
+        .org-node.vestigings-manager .org-node-role {
+            font-size: 0.9375rem;
+            color: #0d9488;
+            font-weight: 600;
+        }
+        
+        .org-node.vestigings-manager .org-node-info {
+            font-size: 0.8125rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        
+        /* Niveau 2: Afdelingen */
+        .org-level-departments {
+            width: 100%;
+        }
+        
+        .org-departments-row {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .org-department-group {
+            flex: 1;
+            min-width: 260px;
+            max-width: 320px;
+        }
+        
+        .org-department {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        
+        .org-department-header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            width: 100%;
+        }
+        
+        .org-department-name {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .org-department-info {
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+        
+        .org-node-count {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+        
+        /* Manager: prominenter binnen afdeling */
+        .org-node.manager {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #0d9488;
+            border-radius: 10px;
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 160px;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        
+        .org-node.manager:hover {
+            border-color: #0d9488;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        
+        .org-node.manager .org-node-name {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .org-node.manager .org-node-role {
+            font-size: 0.8125rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+        
+        .org-node.manager .org-node-info {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        /* Behandelaren: eigen rij met label, rustigere kaartjes */
+        .org-behandelaren-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        
+        .org-behandelaren {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 4px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            width: 100%;
+        }
+        
+        .org-node.behandelaar,
+        .org-node.behandelaren {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 120px;
+            flex: 0 1 calc(50% - 6px);
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        
+        .org-node.behandelaren:hover {
+            border-color: #0d9488;
+            background: rgba(13, 148, 136, 0.06);
+        }
+        
+        .org-node.behandelaren .org-node-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 2px;
+        }
+        
+        .org-node.behandelaren .org-node-role {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .org-node.behandelaren .org-node-count {
+            font-size: 0.6875rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        
+        .org-node-name { font-size: 1rem; font-weight: 600; color: #1a202c; margin-bottom: 4px; }
+        .org-node-role { font-size: 0.8125rem; color: #64748b; font-weight: 500; }
+        .org-node-info { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
+        /* Kleur per afdeling: subtiele accentlijn */
+        .org-department-group[data-afdeling="1"] .org-department { border-left: 4px solid #0d9488; }
+        .org-department-group[data-afdeling="2"] .org-department { border-left: 4px solid #3b82f6; }
+        .org-department-group[data-afdeling="3"] .org-department { border-left: 4px solid #7c3aed; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">Wortell × Cordaan</div>
+    </div>
+    
+    <div class="container">
+        <a href="/" class="back-link">&#8592; Terug naar overzicht</a>
+        
+        <div class="page-header">
+            <p class="page-badge">RLS</p>
+            <h1>RLS & Identity Propagation Demo</h1>
+            <p>
+                Test Row Level Security met verschillende gebruikersrollen. 
+                Elke gebruiker ziet alleen de data waar hij of zij toegang toe heeft.
+            </p>
+        </div>
+        
+        <div class="info-card">
+            <h2>Hoe werkt het?</h2>
+            <p>
+                <strong>Row Level Security (RLS)</strong> zorgt ervoor dat gebruikers alleen data zien waar ze toegang toe hebben. 
+                De filtering gebeurt op applicatieniveau en wordt bepaald door:
+            </p>
+            <ul>
+                <li><strong>Rol:</strong> Vestigingsmanagers zien alle cliënten; managers hun afdeling; behandelaren alleen eigen cliënten.</li>
+                <li><strong>Afdeling:</strong> Gebruikers zien alleen collega's en cliënten in hun eigen afdeling.</li>
+                <li><strong>Toegangsrechten:</strong> Expliciete rechten via de Toegangsrechten-tabel.</li>
+            </ul>
+        </div>
+        
+        {% if organogram_data %}
+        <div class="info-card organogram-container">
+            <h2>Organisatiestructuur</h2>
+            <p>
+                Klik op een persoon om hun dashboard te bekijken en te zien welke data zij kunnen zien volgens de RLS-policies.
+            </p>
+            
+            <div class="organogram">
+                {% if organogram_data.VestigingsManager %}
+                <div class="org-level org-level-vestigings">
+                    <a href="/demo/{{ organogram_data.VestigingsManager.VolledigeNaam }}" class="org-node vestigings-manager">
+                        <div class="org-node-name">{{ organogram_data.VestigingsManager.Voornaam }}</div>
+                        <div class="org-node-role">Vestigings Manager</div>
+                        <div class="org-node-info">Toegang tot alle afdelingen</div>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <div class="org-level org-level-departments">
+                    <h3 class="section-label">Afdelingen</h3>
+                    <div class="org-departments-row">
+                        {% for afdeling in organogram_data.Afdelingen %}
+                        <div class="org-department-group" data-afdeling="{{ afdeling.AfdelingID }}">
+                            <div class="org-department">
+                                <div class="org-department-header">
+                                    <div class="org-department-name">{{ afdeling.AfdelingNaam }}</div>
+                                    <div class="org-department-info">{{ afdeling.Gebied }}</div>
+                                    <div class="org-node-count">{{ afdeling.TotaalCliënten }} cliënten</div>
+                                </div>
+                                
+                                {% if afdeling.ManagerGebruikerID %}
+                                <a href="/demo/{{ afdeling.ManagerNaam }}" class="org-node manager">
+                                    <div class="org-node-name">{{ afdeling.ManagerNaam }}</div>
+                                    <div class="org-node-role">Manager</div>
+                                    <div class="org-node-info">Afdeling {{ afdeling.AfdelingID }}</div>
+                                </a>
+                                {% endif %}
+                                
+                                {% if afdeling.Behandelaren %}
+                                <p class="org-behandelaren-label">Behandelaren</p>
+                                <div class="org-behandelaren">
+                                    {% for behandelaar in afdeling.Behandelaren %}
+                                    <a href="/demo/{{ behandelaar.Voornaam }}" class="org-node behandelaren">
+                                        <div class="org-node-name">{{ behandelaar.Voornaam }}</div>
+                                        <div class="org-node-role">Behandelaar</div>
+                                        <div class="org-node-count">{{ behandelaar.AantalCliënten }} cliënten</div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
