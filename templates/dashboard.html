@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - {{ gebruiker.VolledigeNaam }} - Wortell × Cordaan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(160deg, #f0f4f8 0%, #e8eef4 50%, #f5f7fa 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            line-height: 1.6;
+            padding: 24px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 16px 24px;
+            margin: 0 -24px 24px -24px;
+        }
+        
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            letter-spacing: 0.02em;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .dashboard-header {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .user-info h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+        
+        .user-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            margin-right: 8px;
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .badge-manager { background: #e0e7ff; color: #3730a3; }
+        .badge-behandelaar { background: #d1fae5; color: #065f46; }
+        .badge-vestigings-manager { background: #d1fae5; color: #065f46; }
+        
+        .department-info {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 10px 18px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .back-link:hover { border-color: #0d9488; color: #0d9488; }
+        
+        .demo-banner {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .stat-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
+        
+        .stat-number { font-size: 1.5rem; font-weight: 700; color: #1a202c; }
+        .stat-label { font-size: 0.8125rem; color: #64748b; margin-top: 4px; }
+        
+        .rls-warning {
+            border: 1px solid #f59e0b;
+            background: #fffbeb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+        
+        .rls-warning strong { color: #1a202c; }
+        .highlight-green { color: #0d9488; font-weight: 600; }
+        .highlight-total { color: #1a202c; font-weight: 600; }
+        .highlight-blocked { color: #b91c1c; font-weight: 500; display: block; margin-top: 6px; }
+        
+        .content-grid { display: grid; gap: 28px; }
+        
+        @media (min-width: 768px) {
+            .content-grid { grid-template-columns: 2fr 1fr; }
+        }
+        
+        .card {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+        
+        .card h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            letter-spacing: -0.01em;
+        }
+        
+        .client-list, .colleague-list { list-style: none; }
+        
+        .client-item {
+            padding: 18px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: #fff;
+            transition: border-color 0.2s ease;
+        }
+        
+        .client-item:hover { border-color: rgba(13, 148, 136, 0.3); }
+        
+        .client-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .client-details {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        .client-details strong { color: #475569; }
+        
+        .rls-reason {
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: #f0fdfa;
+            border-left: 4px solid #0d9488;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            color: #0f766e;
+        }
+        
+        .colleague-item {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .colleague-item:last-child { border-bottom: none; }
+        
+        .colleague-name { font-weight: 600; color: #1a202c; }
+        .colleague-role { font-size: 0.875rem; color: #64748b; }
+        
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .empty-state ul {
+            margin-top: 12px;
+            text-align: left;
+            display: inline-block;
+        }
+        
+        .rls-toggle {
+            width: 100%;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #1a202c;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .rls-toggle:hover { border-color: #0d9488; color: #0d9488; }
+        
+        .toggle-icon { font-size: 0.75rem; transition: transform 0.2s; }
+        .rls-toggle.active .toggle-icon { transform: rotate(180deg); }
+        
+        .rls-explanation {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        .rls-explanation h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+        
+        .rls-explanation p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 16px;
+            line-height: 1.65;
+        }
+        
+        .rls-rule {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            font-size: 0.875rem;
+        }
+        
+        .rls-rule strong { color: #1a202c; display: block; margin-bottom: 4px; }
+        .rls-rule div { color: #64748b; }
+        
+        .rls-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+        
+        .rls-stat {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        
+        .rls-stat-visible { border-color: #0d9488; background: #f0fdfa; }
+        .rls-stat-blocked { border-color: #fecaca; background: #fef2f2; }
+        .rls-stat-number { font-size: 1.25rem; font-weight: 700; color: #1a202c; }
+        .rls-stat-visible .rls-stat-number { color: #0d9488; }
+        .rls-stat-blocked .rls-stat-number { color: #b91c1c; }
+        .rls-stat-label { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+        
+        .client-list-warning {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">Wortell × Cordaan</div>
+    </div>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="header-top">
+                <div class="user-info">
+                    <h1>{{ gebruiker.VolledigeNaam }}</h1>
+                    <div>
+                        <span class="user-badge badge-{{ gebruiker.Rol.lower().replace(' ', '-') }}">{{ gebruiker.Rol }}</span>
+                        <span class="department-info">{{ gebruiker.AfdelingNaam }} – {{ gebruiker.Gebied }}</span>
+                    </div>
+                </div>
+                <a href="/rls-demo" class="back-link">&#8592; Terug naar RLS Demo</a>
+            </div>
+            
+            {% if demo_mode %}
+            <div class="demo-banner">
+                <strong>Demo modus:</strong> Je bekijkt de data als {{ gebruiker.VolledigeNaam }}. 
+                In productie wordt dit bepaald door je Azure AD token via Identity Propagation.
+            </div>
+            {% endif %}
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">{{ cliënten|length }}</div>
+                    <div class="stat-label">Zichtbare cliënten</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ collega_s|length }}</div>
+                    <div class="stat-label">Collega's</div>
+                </div>
+            </div>
+            
+            {% if rls_info and rls_info.totaal_cliënten > cliënten|length %}
+            <div class="rls-warning">
+                <strong>RLS-filtering actief:</strong> Je ziet <span class="highlight-green">{{ cliënten|length }}</span> van de <span class="highlight-total">{{ rls_info.totaal_cliënten }}</span> cliënten.
+                <span class="highlight-blocked">{{ rls_info.totaal_cliënten - cliënten|length }} cliënten zijn verborgen</span> volgens de Row Level Security-regels.
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if rls_info %}
+        <div class="card" style="margin-bottom: 24px;">
+            <button class="rls-toggle" onclick="toggleRLSExplanation()">
+                <span class="toggle-icon">&#9660;</span>
+                <span class="toggle-text">Row Level Security (RLS) uitleg</span>
+            </button>
+            <div class="rls-explanation" id="rlsExplanation" style="display: none;">
+                <h3>Hoe werkt RLS-filtering?</h3>
+                <p>
+                    Row Level Security zorgt ervoor dat je alleen data ziet waar je toegang toe hebt. 
+                    De filtering gebeurt op applicatieniveau op basis van je rol en afdeling.
+                </p>
+                {% for rule in rls_info.rls_rules %}
+                <div class="rls-rule">
+                    <strong>{{ rule.regel }}</strong>
+                    <div>{{ rule.beschrijving }}</div>
+                    <div style="color: #0d9488; margin-top: 6px; font-weight: 500;">{{ rule.toepassing }}</div>
+                </div>
+                {% endfor %}
+                <div class="rls-stats">
+                    <div class="rls-stat">
+                        <div class="rls-stat-number">{{ rls_info.totaal_cliënten }}</div>
+                        <div class="rls-stat-label">Totaal cliënten in database</div>
+                    </div>
+                    <div class="rls-stat">
+                        <div class="rls-stat-number">{{ rls_info.cliënten_in_afdeling }}</div>
+                        <div class="rls-stat-label">Cliënten in {{ rls_info.afdeling_naam }}</div>
+                    </div>
+                    {% if gebruiker.Rol == 'Behandelaar' %}
+                    <div class="rls-stat">
+                        <div class="rls-stat-number">{{ rls_info.eigen_cliënten }}</div>
+                        <div class="rls-stat-label">Aan jou toegewezen</div>
+                    </div>
+                    {% endif %}
+                    <div class="rls-stat rls-stat-visible">
+                        <div class="rls-stat-number">{{ cliënten|length }}</div>
+                        <div class="rls-stat-label">Cliënten die jij ziet (na RLS)</div>
+                    </div>
+                    {% if rls_info.totaal_cliënten > cliënten|length %}
+                    <div class="rls-stat rls-stat-blocked">
+                        <div class="rls-stat-number">{{ rls_info.totaal_cliënten - cliënten|length }}</div>
+                        <div class="rls-stat-label">Cliënten die je niet ziet</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="content-grid">
+            <div class="card">
+                <h2>Cliënten (RLS toegepast)</h2>
+                {% if rls_info and rls_info.totaal_cliënten > cliënten|length %}
+                <div class="client-list-warning">
+                    Je ziet <strong>{{ cliënten|length }}</strong> van de <strong>{{ rls_info.totaal_cliënten }}</strong> cliënten. 
+                    <strong style="color: #b91c1c;">{{ rls_info.totaal_cliënten - cliënten|length }} cliënten zijn verborgen</strong> door RLS-filtering.
+                </div>
+                {% endif %}
+                {% if cliënten %}
+                <ul class="client-list">
+                    {% for cliënt in cliënten %}
+                    <li class="client-item">
+                        <div class="client-name">{{ cliënt.Voornaam }} {{ cliënt.Achternaam }}</div>
+                        <div class="client-details">
+                            <div><strong>Afdeling:</strong> {{ cliënt.AfdelingNaam }}</div>
+                            {% if cliënt.BehandelaarNaam %}<div><strong>Behandelaar:</strong> {{ cliënt.BehandelaarNaam }}</div>{% endif %}
+                            {% if cliënt.Geboortedatum %}<div><strong>Geboortedatum:</strong> {{ cliënt.Geboortedatum }}</div>{% endif %}
+                            {% if cliënt.RLS_Reason %}
+                            <div class="rls-reason"><strong>Toegang verleend:</strong> {{ cliënt.RLS_Reason }}</div>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <p>Geen cliënten gevonden.</p>
+                    <ul>
+                        <li>Geen toegang volgens de RLS-policies</li>
+                        <li>Geen cliënten in jouw afdeling</li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card">
+                <h2>Collega's</h2>
+                {% if collega_s %}
+                <ul class="colleague-list">
+                    {% for collega in collega_s %}
+                    <li class="colleague-item">
+                        <div>
+                            <div class="colleague-name">{{ collega.VolledigeNaam }}</div>
+                            <div class="colleague-role">{{ collega.Rol }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">Geen collega's in deze afdeling.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleRLSExplanation() {
+            var explanation = document.getElementById('rlsExplanation');
+            var toggle = document.querySelector('.rls-toggle');
+            if (explanation.style.display === 'none') {
+                explanation.style.display = 'block';
+                toggle.classList.add('active');
+            } else {
+                explanation.style.display = 'none';
+                toggle.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
