@@ -1,11 +1,12 @@
 """
-Database connectie en configuratie voor SQLite
+Database connectie en configuratie voor SQLite.
+Database wordt automatisch geïnitialiseerd met schema en testdata uit app.schema (geen extern bestand nodig).
 """
 import sqlite3
-import os
 from typing import Optional
 from pathlib import Path
 from app.config import settings
+from app.schema import get_schema_sql
 
 
 class DatabaseConnection:
@@ -27,11 +28,30 @@ class DatabaseConnection:
         
         return data_dir / db_name
     
-    def _ensure_database_exists(self):
-        """Zorg dat database bestaat"""
-        if not self.db_path.exists():
-            # Database wordt automatisch aangemaakt bij eerste connectie
-            conn = sqlite3.connect(str(self.db_path))
+    def _schema_is_initialized(self, conn: sqlite3.Connection) -> bool:
+        """Controleer of alle vereiste tabellen bestaan (voorkomt half-geïnitialiseerde DB)."""
+        required = {"Gebruikers", "Afdelingen", "Cliënten", "Toegangsrechten"}
+        cursor = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name IN (?,?,?,?)",
+            tuple(required),
+        )
+        found = {row[0] for row in cursor.fetchall()}
+        return required.issubset(found)
+    
+    def _run_schema_script(self, conn: sqlite3.Connection) -> None:
+        """Voer schema en testdata uit (uit app.schema, geen extern bestand)."""
+        script = get_schema_sql()
+        # Alleen uitvoerbare regels; SQLite negeert comments maar executescript kan ze bevatten
+        conn.executescript(script)
+        conn.commit()
+    
+    def _ensure_database_exists(self) -> None:
+        """Zorg dat database bestaat en zo nodig schema + testdata aanmaken."""
+        conn = sqlite3.connect(str(self.db_path))
+        try:
+            if not self._schema_is_initialized(conn):
+                self._run_schema_script(conn)
+        finally:
             conn.close()
     
     def get_connection(self):
